@@ -33,6 +33,26 @@ class ToDoDouController extends AbstractController
             
         ]);
     }
+    #[Route('/delete/{id}', name: 'app.todo.delete' , methods : "GET")]
+    public function delete(Request $request, int $id)
+    {
+        $session = $request->getSession();
+        $todolist = $session->get('todolist');
+        
+        foreach ($todolist as $key => $todo)
+        {
+            if ($todo->id == $id)
+            {
+                unset($todolist[$key]);
+            }
+        } 
+        $session->set('todolist', $todolist);
+            return $this->redirect("/todo");
+    }
+    
+     
+
+
     #[Route('/detail/{id}', name: 'app.todo.detail' , methods : "GET")]
     public function detail(Request $request, int $id): Response
     {
@@ -58,15 +78,29 @@ class ToDoDouController extends AbstractController
             'todo' => $result,
     ]);
     }
-    /*
-    * définir une route qui permettra le suppresion d'une tache
-    * définir un bouton réalisant cette suppression
-    *envoyée l'id de la tache à supprimer dans la route crée précédemment
-    * parcourir la todolist et de supprimer de cette liste la todo (en comparant les ids par exemple)
-    * redirection, vers ma pase todo
-    */
+ /*
+ * Route permettant le changement d'etat d'une todo
+ * on récupère l'id dans l'url 
+ */
+#[Route('/patch/completed/{id}', name : 'app.todo.patch.completed', methods: "GET")]
+    public function  patchCompleted(Request $request, int $id) : Response
+    {
+        $session = $request->getSession();
+        $todolist = $session->get('todolist');
+        foreach ($todolist as $todo)
+        {
+            if ($todo ->id ==$id)
+            {
+                $todo->completed = !$todo->completed;
+            }
+        }
 
-        private function init()
+        $session->set('todolist', $todolist);
+
+        return $this->redirect('/todo');
+    }
+
+        private function init() : array
         {
             return [
                 new Todo("Apprendre symfony", "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus, obcaecati!"),
@@ -75,6 +109,5 @@ class ToDoDouController extends AbstractController
             ];
 
         }
-
-
+    
 }
